@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local/private data
+data/raw/
+data/private/
+private-configs/
+real-device-configs/
+
+# Power BI local files
+*.pbix
+*.pbit
+
+# Office exports / local analysis files
+*.xlsx
+
+# Secrets / credentials
+secrets.*
+credentials.*
+*.env

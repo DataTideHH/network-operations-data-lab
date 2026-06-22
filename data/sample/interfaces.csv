@@ -1,0 +1,6 @@
+device_name,interface_name,interface_type,admin_status,oper_status,vlan,port_role,description
+lab-switch-01,Gi0/1,gigabitEthernet,up,up,10,access,lab-client-01
+lab-switch-01,Gi0/2,gigabitEthernet,up,down,10,access,unused
+lab-switch-01,Gi0/3,gigabitEthernet,up,up,20,access,lab-client-02
+lab-switch-01,Gi0/8,gigabitEthernet,up,up,trunk,trunk,uplink-to-lab-switch-02
+lab-switch-02,Fa0/1,fastEthernet,up,up,10,access,legacy-client-01

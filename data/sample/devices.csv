@@ -1,0 +1,4 @@
+device_id,device_name,device_type,vendor,model,role,location
+1,lab-switch-01,switch,Cisco,Catalyst 3560CX,access-switch,home-lab
+2,lab-switch-02,switch,Cisco,Catalyst 2950SX,legacy-switch,home-lab
+3,lab-router-01,router,Generic,Lab Router,edge-router,home-lab
