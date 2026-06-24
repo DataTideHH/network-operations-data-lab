@@ -1,0 +1,19 @@
+check_no,check_name,category,status,affected_rows,description
+1,Row count: devices,summary,INFO,3,Total number of rows in devices.csv.
+1,Row count: interfaces,summary,INFO,5,Total number of rows in interfaces.csv.
+2,Missing device identifiers,issue,OK,0,Devices with a missing or empty device_id.
+3,Duplicate device IDs,issue,OK,0,Rows sharing a non-empty device_id with at least one other row.
+4,Missing device names,issue,OK,0,Devices with a missing or empty device_name.
+5,Duplicate device names,issue,OK,0,Rows sharing a non-empty device_name with at least one other row.
+6,Missing interface device references,issue,OK,0,Interfaces with a missing or empty device_name reference.
+7,Missing interface names,issue,OK,0,Interfaces with a missing or empty interface_name.
+8,Duplicate interface rows per device,issue,OK,0,Rows sharing the same device_name + interface_name with another row.
+9,Interfaces referencing unknown devices,issue,OK,0,Interfaces whose device_name does not exist in devices.csv.
+10,Missing administrative or operational status,issue,OK,0,Interfaces with a missing admin_status or oper_status.
+11,Admin up but operationally down,issue,FAIL,1,Interfaces admin up while operationally down/notconnect.
+12,Access ports without VLAN documentation,issue,OK,0,Access ports with a missing or empty vlan value.
+13,Trunk ports without trunk documentation,issue,OK,0,Trunk ports whose vlan field is not set to 'trunk'.
+14,Missing interface descriptions,issue,OK,0,Interfaces with a missing or empty description.
+15,Device count by role (distinct roles),summary,INFO,3,Number of distinct device roles present in devices.csv.
+16,Interface status summary (distinct combinations),summary,INFO,2,Number of distinct admin_status/oper_status combinations.
+17,Port role summary (distinct roles),summary,INFO,2,Number of distinct port roles present in interfaces.csv.

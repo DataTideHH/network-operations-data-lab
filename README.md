@@ -102,15 +102,16 @@ The sample data is intentionally synthetic/anonymized and does not contain real 
 
 ## Current scripts
 
-A first Python script is included under:
+Python helper scripts are included under:
 
-```text
-scripts/load_sample_data.py
-```
+- `scripts/load_sample_data.py`
+- `scripts/run_data_quality_checks.py`
 
-It loads the sample CSV files, prints the records and calculates simple summaries such as interface status counts and port role counts.
+`load_sample_data.py` loads the public-safe sample CSV files, prints the records and calculates simple summaries such as interface status counts and port role counts.
 
-This is an early data-loading step. It is intentionally simple and uses the Python standard library so the basic workflow remains easy to inspect.
+`run_data_quality_checks.py` runs a numbered, public-safe data-quality check workflow aligned with `sql/data_quality_checks.sql`. It uses only the Python standard library and writes an aggregated report to `data/processed/data_quality_report.csv`.
+
+The generated report contains only check numbers, check names, categories, statuses, affected row counts and short descriptions. It does not write device names, interface names or row-level identifiers.
 
 ## Current SQL analysis
 
@@ -131,13 +132,21 @@ The current SQL files demonstrate basic reporting and data-quality questions suc
 
 These queries are meant as a first bridge between networking documentation, data-quality checks and BI-style reporting logic.
 
+## Current data-quality report
+
+A public-safe data-quality report is generated under:
+
+- `data/processed/data_quality_report.csv`
+
+The report is intentionally aggregated. It shows the check number, check name, category, status, affected row count and a short description, but it does not expose device names, interface names or other row-level identifiers.
+
+The current sample report contains one expected finding for check 11, because the synthetic sample data includes an administratively up but operationally down interface. This demonstrates that the validation workflow can detect operational data-quality issues without exposing sensitive details.
+
 ## Next steps
 
 Planned next steps are intentionally incremental:
 
-1. add a Python data-quality script based on the current CSV sample structure
-2. generate a small public-safe data-quality report under `data/processed/`
-3. load the sample CSV files into SQLite
-4. extend the sample data model with VLANs and basic topology information
-5. document a small Power BI concept based on the sample tables
-6. later connect sanitized real lab outputs after the Cisco hardware baseline has been verified
+1. load the sample CSV files into SQLite
+2. extend the sample data model with VLANs and basic topology information
+3. document a small Power BI concept based on the sample tables
+4. later connect sanitized real lab outputs after the Cisco hardware baseline has been verified
