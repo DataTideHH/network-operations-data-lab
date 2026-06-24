@@ -114,26 +114,30 @@ This is an early data-loading step. It is intentionally simple and uses the Pyth
 
 ## Current SQL analysis
 
-Starter SQL analysis queries are included under:
+Starter SQL analysis and validation queries are included under:
 
-```text
-sql/sample_analysis.sql
-```
+- `sql/sample_analysis.sql`
+- `sql/data_quality_checks.sql`
 
-The current queries demonstrate basic reporting questions such as:
+The current SQL files demonstrate basic reporting and data-quality questions such as:
 
 - device count by role
 - interface count by operational status
 - access/trunk port count by port role
+- missing device or interface identifiers
+- duplicate device or interface records
+- interfaces referencing unknown devices
+- interfaces administratively up but operationally down
 
-These queries are meant as a first bridge between networking documentation and BI-style reporting logic.
+These queries are meant as a first bridge between networking documentation, data-quality checks and BI-style reporting logic.
 
 ## Next steps
 
 Planned next steps are intentionally incremental:
 
-1. extend the sample data model with VLANs and basic topology information
-2. load the sample CSV files into SQLite
-3. add SQL data-quality checks
-4. document a small Power BI concept based on the sample tables
-5. later connect sanitized real lab outputs after the Cisco hardware baseline has been verified
+1. add a Python data-quality script based on the current CSV sample structure
+2. generate a small public-safe data-quality report under `data/processed/`
+3. load the sample CSV files into SQLite
+4. extend the sample data model with VLANs and basic topology information
+5. document a small Power BI concept based on the sample tables
+6. later connect sanitized real lab outputs after the Cisco hardware baseline has been verified
