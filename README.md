@@ -149,4 +149,6 @@ Planned next steps are intentionally incremental:
 1. load the sample CSV files into SQLite
 2. extend the sample data model with VLANs and basic topology information
 3. document a small Power BI concept based on the sample tables
-4. later connect sanitized real lab outputs after the Cisco hardware baseline has been verified
+4. maintain a public-safe Cisco switch baseline document
+5. plan VLAN 10 / VLAN 20 / VLAN 30 as an incremental CCNA lab roadmap
+6. later connect sanitized real lab outputs after the Cisco hardware baseline has been verified
