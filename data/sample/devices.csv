@@ -1,4 +1,6 @@
-device_id,device_name,device_type,vendor,model,role,location
-1,lab-switch-01,switch,Cisco,Catalyst 3560CX,access-switch,home-lab
-2,lab-switch-02,switch,Cisco,Catalyst 2950SX,legacy-switch,home-lab
-3,lab-router-01,router,Generic,Lab Router,edge-router,home-lab
+device_id,device_name,device_type,vendor,model,role,location,location_scope,management_scope,is_active
+dev-001,LAB_SWITCH_01,switch,Cisco,Catalyst 3560CX,access_switch,home-lab,home_lab,managed,true
+dev-002,LAB_ROUTER,router,Generic,Sanitized Router,edge_router,home-lab,home_lab,managed,true
+dev-003,LAB_WIRELESS_BRIDGE,wireless_bridge,Generic,Sanitized Wireless Bridge,media_bridge,home-lab,home_lab,managed,true
+dev-004,LAB_CLIENT_A,client,Generic,Sanitized Client,lab_client,home-lab,home_lab,endpoint,true
+dev-005,LAB_CLIENT_B,client,Generic,Sanitized Client,lab_client,home-lab,home_lab,endpoint,true
