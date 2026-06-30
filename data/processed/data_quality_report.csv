@@ -1,5 +1,5 @@
 check_no,check_name,category,status,affected_rows,description
-1,Row count: devices,summary,INFO,3,Total number of rows in devices.csv.
+1,Row count: devices,summary,INFO,5,Total number of rows in devices.csv.
 1,Row count: interfaces,summary,INFO,5,Total number of rows in interfaces.csv.
 2,Missing device identifiers,issue,OK,0,Devices with a missing or empty device_id.
 3,Duplicate device IDs,issue,OK,0,Rows sharing a non-empty device_id with at least one other row.
@@ -14,6 +14,20 @@ check_no,check_name,category,status,affected_rows,description
 12,Access ports without VLAN documentation,issue,OK,0,Access ports with a missing or empty vlan value.
 13,Trunk ports without trunk documentation,issue,OK,0,Trunk ports whose vlan field is not set to 'trunk'.
 14,Missing interface descriptions,issue,OK,0,Interfaces with a missing or empty description.
-15,Device count by role (distinct roles),summary,INFO,3,Number of distinct device roles present in devices.csv.
+15,Device count by role (distinct roles),summary,INFO,4,Number of distinct device roles present in devices.csv.
 16,Interface status summary (distinct combinations),summary,INFO,2,Number of distinct admin_status/oper_status combinations.
-17,Port role summary (distinct roles),summary,INFO,2,Number of distinct port roles present in interfaces.csv.
+17,Port role summary (distinct roles),summary,INFO,4,Number of distinct port roles present in interfaces.csv.
+18,Row count: topology_links,summary,INFO,3,Total number of rows in topology_links.csv.
+19,Interfaces with unknown device_id,issue,OK,0,Interfaces whose device_id does not exist in devices.csv.
+20,Duplicate interface IDs,issue,OK,0,Rows in interfaces.csv sharing a non-empty interface_id with another row.
+21,Duplicate device_id + interface_name pairs,issue,OK,0,Rows sharing the same device_id + interface_name with another row.
+22,Interfaces with unexpected port_role,issue,OK,0,"port_role outside the allowed list: ['access', 'bridge_uplink', 'client_access', 'lab_access', 'trunk', 'uplink']."
+23,Invalid description_present values,issue,OK,0,description_present values other than 'true' or 'false'.
+24,Active interfaces without description,issue,OK,0,Interfaces with admin_status=up and oper_status=up but an empty description.
+25,Uplink interfaces with unexpected downstream cardinality,issue,OK,0,port_role=uplink interfaces where expected_downstream_devices is not 'multiple'.
+26,client_access interfaces with unexpected downstream cardinality,issue,OK,0,port_role=client_access interfaces where expected_downstream_devices is not 'single'.
+27,Topology links with unknown source_device_id,issue,OK,0,Links whose source_device_id does not exist in devices.csv.
+28,Topology links with unknown source_interface_id,issue,OK,0,"Links whose (source_device_id, source_interface_id) pair does not exist in interfaces.csv."
+29,Topology links with unknown target_device_id,issue,OK,0,Links whose target_device_id does not exist in devices.csv.
+30,Active links with source interface not operationally up,issue,OK,0,link_status=active links whose source interface is missing or not oper_status=up.
+31,Links where link_role does not match source port_role,issue,OK,0,Links whose link_role differs from the port_role of their source interface (links with an unresolved source interface are excluded here -- see check 28).
