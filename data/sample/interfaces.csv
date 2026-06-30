@@ -1,6 +1,6 @@
-device_name,interface_name,interface_type,admin_status,oper_status,vlan,port_role,description
-lab-switch-01,Gi0/1,gigabitEthernet,up,up,10,access,lab-client-01
-lab-switch-01,Gi0/2,gigabitEthernet,up,down,10,access,unused
-lab-switch-01,Gi0/3,gigabitEthernet,up,up,20,access,lab-client-02
-lab-switch-01,Gi0/8,gigabitEthernet,up,up,trunk,trunk,uplink-to-lab-switch-02
-lab-switch-02,Fa0/1,fastEthernet,up,up,10,access,legacy-client-01
+device_id,device_name,interface_id,interface_name,interface_type,admin_status,oper_status,vlan,port_role,speed_mbps,duplex,description,description_present,expected_downstream_devices
+dev-001,LAB_SWITCH_01,int-001,Gi0/1,gigabitEthernet,up,up,1,uplink,1000,full,UPLINK_TO_WIRELESS_BRIDGE,true,multiple
+dev-001,LAB_SWITCH_01,int-002,Gi0/2,gigabitEthernet,up,up,1,client_access,1000,full,LAB_CLIENT_A_ACCESS,true,single
+dev-001,LAB_SWITCH_01,int-003,Gi0/3,gigabitEthernet,up,up,1,client_access,1000,full,LAB_CLIENT_B_ACCESS,true,single
+dev-001,LAB_SWITCH_01,int-004,Gi0/4,gigabitEthernet,up,down,1,lab_access,0,unknown,LAB_UNUSED_TEST_PORT,true,none
+dev-003,LAB_WIRELESS_BRIDGE,int-005,LAN1,gigabitEthernet,up,up,1,bridge_uplink,1000,full,BRIDGE_TO_LAB_SWITCH,true,single
