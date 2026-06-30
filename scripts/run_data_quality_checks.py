@@ -18,14 +18,26 @@ It is intentionally dependency-free: it uses only the Python standard library
 ``scripts/load_sample_data.py``. No pandas, no external packages, no
 ``requirements.txt`` needed.
 
-It reads the two sample CSV files, runs every check, prints a short console
+It reads the three sample CSV files, runs every check, prints a short console
 summary and writes a public-safe report to
 ``data/processed/data_quality_report.csv``.
 
 Public-safe: the report contains only the check number, name, category, status,
 affected count and a short description. It never writes device names, interface
-names or any other row-level identifier, so the output is safe for a public
-repository.
+names, link IDs or any other row-level identifier, so the output is safe for a
+public repository.
+
+--------------------------------------------------------------------------
+Checks 18-31 (added on top of the original 1-17, devices/interfaces only):
+--------------------------------------------------------------------------
+These extend the report to data/sample/topology_links.csv and to the richer
+interfaces.csv schema (device_id, interface_id, description_present,
+expected_downstream_devices). The original checks 1-17 are unchanged.
+
+Note: topology_links.target_interface_id is intentionally NOT validated against
+interfaces.csv. Client endpoints (LAB_CLIENT_A, LAB_CLIENT_B, ...) do not have
+their own interface rows in interfaces.csv, so target_interface_id is "unknown"
+by design for client-facing links. Only target_device_id is checked (29).
 
 Run from anywhere inside the repository:
 
@@ -63,15 +75,29 @@ SAMPLE_DIR = REPO_ROOT / "data" / "sample"
 PROCESSED_DIR = REPO_ROOT / "data" / "processed"
 DEVICES_CSV = SAMPLE_DIR / "devices.csv"
 INTERFACES_CSV = SAMPLE_DIR / "interfaces.csv"
+TOPOLOGY_CSV = SAMPLE_DIR / "topology_links.csv"
 REPORT_CSV = PROCESSED_DIR / "data_quality_report.csv"
 
 EXPECTED_DEVICE_COLUMNS = [
     "device_id", "device_name", "device_type", "vendor", "model", "role", "location",
 ]
+# Extended to cover the columns the new checks (19-26) rely on. The original
+# columns are untouched, so checks 1-17 keep working exactly as before.
 EXPECTED_INTERFACE_COLUMNS = [
-    "device_name", "interface_name", "interface_type",
+    "device_id", "device_name", "interface_id", "interface_name", "interface_type",
     "admin_status", "oper_status", "vlan", "port_role", "description",
+    "description_present", "expected_downstream_devices",
 ]
+EXPECTED_TOPOLOGY_COLUMNS = [
+    "link_id", "source_device_id", "source_interface_id",
+    "target_device_id", "target_interface_id",
+    "link_role", "link_status", "expected_downstream_devices",
+]
+
+# Adjust this list if new port roles are introduced in interfaces.csv.
+ALLOWED_PORT_ROLES = {
+    "access", "trunk", "uplink", "client_access", "lab_access", "bridge_uplink",
+}
 
 
 # --------------------------------------------------------------------------
@@ -139,7 +165,7 @@ def read_csv_dicts(path: Path, expected_columns: list[str]) -> list[dict]:
 
 
 # --------------------------------------------------------------------------
-# Checks 1-17 (numbered to match sql/data_quality_checks.sql)
+# Checks 1-17 (numbered to match sql/data_quality_checks.sql) -- unchanged
 # --------------------------------------------------------------------------
 
 def run_checks(devices: list[dict], interfaces: list[dict]) -> None:
@@ -230,20 +256,147 @@ def run_checks(devices: list[dict], interfaces: list[dict]) -> None:
     record(14, "Missing interface descriptions", "issue", n,
            "Interfaces with a missing or empty description.")
 
-    # 15. Device count by role  (SQL #15) -- public-safe: distinct role count only
+    # 15. Device count by role (SQL #15) -- public-safe: distinct role count only
     role_counts = Counter(norm(d["role"]) for d in devices)
     record(15, "Device count by role (distinct roles)", "summary", len(role_counts),
            "Number of distinct device roles present in devices.csv.")
 
-    # 16. Interface status summary  (SQL #16) -- distinct admin/oper combinations
+    # 16. Interface status summary (SQL #16) -- distinct admin/oper combinations
     status_combos = {(norm(i["admin_status"]), norm(i["oper_status"])) for i in interfaces}
     record(16, "Interface status summary (distinct combinations)", "summary", len(status_combos),
            "Number of distinct admin_status/oper_status combinations.")
 
-    # 17. Port role summary  (SQL #17) -- distinct port-role count
+    # 17. Port role summary (SQL #17) -- distinct port-role count
     port_roles = {norm(i["port_role"]) for i in interfaces}
     record(17, "Port role summary (distinct roles)", "summary", len(port_roles),
            "Number of distinct port roles present in interfaces.csv.")
+
+
+# --------------------------------------------------------------------------
+# Checks 18-31 -- topology_links.csv + extended interfaces.csv schema
+# --------------------------------------------------------------------------
+
+def run_topology_checks(devices: list[dict], interfaces: list[dict], links: list[dict]) -> None:
+    # 18. Row count: topology_links (file presence + expected columns are
+    #     already enforced by read_csv_dicts before this function runs, same
+    #     hard-fail pattern as devices.csv/interfaces.csv above; this entry
+    #     just confirms successful load with a row count, same as check 1).
+    record(18, "Row count: topology_links", "summary", len(links),
+           "Total number of rows in topology_links.csv.")
+
+    known_device_ids = {d["device_id"].strip() for d in devices if not is_blank(d["device_id"])}
+
+    # 19. interfaces.device_id must exist in devices.csv
+    n = sum(1 for i in interfaces if i["device_id"].strip() not in known_device_ids)
+    record(19, "Interfaces with unknown device_id", "issue", n,
+           "Interfaces whose device_id does not exist in devices.csv.")
+
+    # 20. Duplicate interface_id in interfaces.csv
+    iface_id_counts = Counter(
+        i["interface_id"].strip() for i in interfaces if not is_blank(i["interface_id"])
+    )
+    n = sum(count for count in iface_id_counts.values() if count > 1)
+    record(20, "Duplicate interface IDs", "issue", n,
+           "Rows in interfaces.csv sharing a non-empty interface_id with another row.")
+
+    # 21. Duplicate device_id + interface_name in interfaces.csv
+    pair_counts = Counter(
+        (i["device_id"].strip(), i["interface_name"].strip()) for i in interfaces
+    )
+    n = sum(count for count in pair_counts.values() if count > 1)
+    record(21, "Duplicate device_id + interface_name pairs", "issue", n,
+           "Rows sharing the same device_id + interface_name with another row.")
+
+    # 22. port_role not in allowed value list
+    n = sum(1 for i in interfaces if norm(i["port_role"]) not in ALLOWED_PORT_ROLES)
+    record(22, "Interfaces with unexpected port_role", "issue", n,
+           f"port_role outside the allowed list: {sorted(ALLOWED_PORT_ROLES)}.")
+
+    # 23. description_present must be true/false
+    allowed_bool = {"true", "false"}
+    n = sum(1 for i in interfaces if norm(i["description_present"]) not in allowed_bool)
+    record(23, "Invalid description_present values", "issue", n,
+           "description_present values other than 'true' or 'false'.")
+
+    # 24. Active interfaces (admin=up AND oper=up) without a description
+    n = sum(
+        1 for i in interfaces
+        if norm(i["admin_status"]) == "up" and norm(i["oper_status"]) == "up"
+        and is_blank(i["description"])
+    )
+    record(24, "Active interfaces without description", "issue", n,
+           "Interfaces with admin_status=up and oper_status=up but an empty description.")
+
+    # 25. uplink interfaces should have expected_downstream_devices=multiple
+    n = sum(
+        1 for i in interfaces
+        if norm(i["port_role"]) == "uplink"
+        and norm(i["expected_downstream_devices"]) != "multiple"
+    )
+    record(25, "Uplink interfaces with unexpected downstream cardinality", "issue", n,
+           "port_role=uplink interfaces where expected_downstream_devices is not 'multiple'.")
+
+    # 26. client_access interfaces should have expected_downstream_devices=single
+    n = sum(
+        1 for i in interfaces
+        if norm(i["port_role"]) == "client_access"
+        and norm(i["expected_downstream_devices"]) != "single"
+    )
+    record(26, "client_access interfaces with unexpected downstream cardinality", "issue", n,
+           "port_role=client_access interfaces where expected_downstream_devices is not 'single'.")
+
+    # 27. topology_links.source_device_id must exist in devices.csv
+    n = sum(1 for l in links if l["source_device_id"].strip() not in known_device_ids)
+    record(27, "Topology links with unknown source_device_id", "issue", n,
+           "Links whose source_device_id does not exist in devices.csv.")
+
+    # 28. topology_links.source_interface_id must exist for that device in interfaces.csv
+    known_iface_pairs = {
+        (i["device_id"].strip(), i["interface_id"].strip()) for i in interfaces
+    }
+    n = sum(
+        1 for l in links
+        if (l["source_device_id"].strip(), l["source_interface_id"].strip()) not in known_iface_pairs
+    )
+    record(28, "Topology links with unknown source_interface_id", "issue", n,
+           "Links whose (source_device_id, source_interface_id) pair does not exist in interfaces.csv.")
+
+    # 29. topology_links.target_device_id must exist in devices.csv
+    # Note: target_interface_id is deliberately not validated -- client
+    # endpoints have no interface row and use "unknown" by design.
+    n = sum(1 for l in links if l["target_device_id"].strip() not in known_device_ids)
+    record(29, "Topology links with unknown target_device_id", "issue", n,
+           "Links whose target_device_id does not exist in devices.csv.")
+
+    # 30. active link must have a source interface with oper_status=up
+    iface_oper_status = {
+        (i["device_id"].strip(), i["interface_id"].strip()): norm(i["oper_status"])
+        for i in interfaces
+    }
+    n = sum(
+        1 for l in links
+        if norm(l["link_status"]) == "active"
+        and iface_oper_status.get(
+            (l["source_device_id"].strip(), l["source_interface_id"].strip())
+        ) != "up"
+    )
+    record(30, "Active links with source interface not operationally up", "issue", n,
+           "link_status=active links whose source interface is missing or not oper_status=up.")
+
+    # 31. link_role should match the port_role of the source interface
+    iface_port_role = {
+        (i["device_id"].strip(), i["interface_id"].strip()): norm(i["port_role"])
+        for i in interfaces
+    }
+    n = sum(
+        1 for l in links
+        if iface_port_role.get(
+            (l["source_device_id"].strip(), l["source_interface_id"].strip())
+        ) not in (None, norm(l["link_role"]))
+    )
+    record(31, "Links where link_role does not match source port_role", "issue", n,
+           "Links whose link_role differs from the port_role of their source interface "
+           "(links with an unresolved source interface are excluded here -- see check 28).")
 
 
 # --------------------------------------------------------------------------
@@ -287,7 +440,9 @@ def print_summary() -> None:
 def main() -> None:
     devices = read_csv_dicts(DEVICES_CSV, EXPECTED_DEVICE_COLUMNS)
     interfaces = read_csv_dicts(INTERFACES_CSV, EXPECTED_INTERFACE_COLUMNS)
+    links = read_csv_dicts(TOPOLOGY_CSV, EXPECTED_TOPOLOGY_COLUMNS)
     run_checks(devices, interfaces)
+    run_topology_checks(devices, interfaces, links)
     write_report()
     print_summary()
 
