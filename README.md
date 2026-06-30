@@ -42,6 +42,20 @@ The first phase is aligned with CCNA-level networking fundamentals:
 - subnetting and Layer 3 concepts
 - network troubleshooting notes
 
+## Current verified lab baseline
+
+A small Cisco switching baseline has been verified in a local private lab environment. The public repository does not publish the real home-network topology, but the sanitized baseline now includes:
+
+- console access from macOS through a USB-serial workflow
+- SSH access for normal local administration
+- a management SVI receiving a stable DHCP-reserved address from the local router
+- one uplink path through a local wireless bridge/repeater
+- two client-facing access links negotiating at 1 Gbit/s full duplex
+- public-safe interface descriptions for the active lab ports
+- successful local gateway and external reachability checks
+
+Real IP addresses, MAC addresses, serial numbers, hostnames and private network details are intentionally excluded.
+
 ## Data and privacy
 
 This repository is designed to be public-safe.
@@ -147,8 +161,8 @@ The current sample report contains one expected finding for check 11, because th
 Planned next steps are intentionally incremental:
 
 1. load the sample CSV files into SQLite
-2. extend the sample data model with VLANs and basic topology information
-3. document a small Power BI concept based on the sample tables
-4. maintain a public-safe Cisco switch baseline document
-5. plan VLAN 10 / VLAN 20 / VLAN 30 as an incremental CCNA lab roadmap
-6. later connect sanitized real lab outputs after the Cisco hardware baseline has been verified
+2. extend the sample data model with sanitized topology and port-description fields
+3. add sanitized sample snapshots for interface description, interface status and MAC-table summaries
+4. document a small Power BI concept based on the sample tables
+5. continue the VLAN 10 / VLAN 20 / VLAN 30 roadmap only on lab-only ports
+6. keep real topology, configuration exports, IP addresses, MAC addresses and device identifiers out of the public repository
