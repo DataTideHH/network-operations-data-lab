@@ -2,6 +2,8 @@
 
 Network Operations Data Lab is a learning and portfolio project that connects networking fundamentals with a Data/BI workflow.
 
+Project page: https://datatidehh.github.io/network-operations-data-lab/
+
 The goal is not only to configure network devices, but to treat network operations as a structured data source.
 
 ## Project idea
@@ -83,6 +85,13 @@ This project demonstrates how infrastructure data can be transformed into useful
     │   ├── sample/
     │   └── processed/
     ├── docs/
+    │   ├── _config.yml
+    │   ├── index.md
+    │   ├── cisco-switch-baseline.md
+    │   ├── data-quality-rules.md
+    │   ├── lab-topology.md
+    │   ├── project-scope.md
+    │   └── vlan-lab-roadmap.md
     ├── powerbi/
     ├── scripts/
     ├── sql/
@@ -94,6 +103,8 @@ This project demonstrates how infrastructure data can be transformed into useful
 Early lab / in progress.
 
 This repository is connected to my Data/BI Analyst track and my CCNA preparation.
+
+The repository now includes a GitHub Pages project landing page for portfolio presentation.
 
 ---
 
@@ -155,6 +166,22 @@ A public-safe data-quality report is generated under:
 The report is intentionally aggregated. It shows the check number, check name, category, status, affected row count and a short description, but it does not expose device names, interface names or other row-level identifiers.
 
 The current sample report contains one expected finding for check 11, because the synthetic sample data includes an administratively up but operationally down interface. This demonstrates that the validation workflow can detect operational data-quality issues without exposing sensitive details.
+
+## GitHub Pages project site
+
+This repository includes a small project landing page under:
+
+    docs/index.md
+
+After GitHub Pages is enabled for the repository, the published site is available at:
+
+    https://datatidehh.github.io/network-operations-data-lab/
+
+Recommended GitHub Pages settings:
+
+    Source: Deploy from a branch
+    Branch: main
+    Folder: /docs
 
 ## Next steps
 
