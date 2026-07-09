@@ -7,7 +7,7 @@ description: Public-safe network operations data, SQL and BI portfolio project
 
 **A public-safe portfolio project that treats network operations as a structured data source for Python, SQL, data-quality checks and BI-style reporting.**
 
-[View repository](https://github.com/DataTideHH/network-operations-data-lab) · [Read the full README](https://github.com/DataTideHH/network-operations-data-lab/blob/main/README.md)
+[View repository](https://github.com/DataTideHH/network-operations-data-lab) · [Read the full README](https://github.com/DataTideHH/network-operations-data-lab/blob/main/README.md) · [DataTideHH portfolio](https://datatidehh.de/)
 
 ---
 
@@ -113,6 +113,13 @@ This is deliberately small, but it mirrors a real Data/BI pattern: operational r
 - data-quality thinking in an IT operations context
 - a bridge between CCNA fundamentals and Data/BI reporting
 - preparation for Power BI dashboards and service operations KPIs
+
+---
+
+## Related DataTideHH project pages
+
+- [Music Production Data Lab](https://datatidehh.github.io/music-production-data-lab/) — public-safe data modeling, SQL/Python workflow and Power BI reporting layer
+- [Spring Boot Process API Basics](https://datatidehh.github.io/spring-boot-process-api-basics/) — small Java/Spring REST API for structured process-check data
 
 ---
 
