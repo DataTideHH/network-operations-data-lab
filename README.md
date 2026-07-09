@@ -10,7 +10,7 @@ The goal is not only to configure network devices, but to treat network operatio
 
 This lab explores how operational network data can be collected, cleaned, modeled, queried and visualized.
 
-Planned data sources include:
+Relevant data sources include:
 
 - device inventory
 - interface status
@@ -21,7 +21,7 @@ Planned data sources include:
 - basic availability checks
 - lab topology documentation
 
-## Planned stack
+## Current and planned stack
 
 - Cisco switching and routing lab
 - Python for parsing and data preparation
@@ -32,9 +32,9 @@ Planned data sources include:
 
 ## Current focus
 
-This project is currently in an early learning-lab stage.
+This project is an active learning-lab and portfolio project. The current public version already includes a sanitized Cisco lab baseline, public-safe sample data, Python helper scripts, SQL analysis files and an aggregated data-quality report.
 
-The first phase is aligned with CCNA-level networking fundamentals:
+The networking foundation remains aligned with CCNA-level topics:
 
 - switching basics
 - VLANs
@@ -43,6 +43,8 @@ The first phase is aligned with CCNA-level networking fundamentals:
 - interface documentation
 - subnetting and Layer 3 concepts
 - network troubleshooting notes
+
+The Data/BI side focuses on turning those operational records into structured, validated and reportable sample data.
 
 ## Current verified lab baseline
 
@@ -100,11 +102,11 @@ This project demonstrates how infrastructure data can be transformed into useful
 
 ## Status
 
-Early lab / in progress.
+Active learning-lab / in progress.
 
-This repository is connected to my Data/BI Analyst track and my CCNA preparation.
+The repository already contains public-safe sample data, Python processing scripts, SQL analysis and validation files, an aggregated data-quality report and a GitHub Pages project landing page.
 
-The repository now includes a GitHub Pages project landing page for portfolio presentation.
+It is connected to my Data/BI Analyst track and my CCNA preparation by treating network operations as a structured reporting domain.
 
 ---
 
