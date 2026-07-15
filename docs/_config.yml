@@ -1,4 +1,21 @@
-theme: jekyll-theme-minimal
+theme: jekyll-theme-cayman
 title: Network Operations Data Lab
 description: Public-safe network operations data, SQL and BI portfolio project
 show_downloads: false
+repository: DataTideHH/network-operations-data-lab
+url: https://datatidehh.github.io
+baseurl: /network-operations-data-lab
+lang: en
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: true
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
