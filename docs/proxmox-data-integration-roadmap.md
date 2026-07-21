@@ -8,7 +8,7 @@ This document defines a future data source and does not represent an operational
 
 The future Proxmox integration should demonstrate how virtualization operations data can be collected, modelled, validated and reported without exposing private infrastructure details.
 
-The technical installation and administration of the hypervisor will belong in `proxmox-virtualization-lab`. This repository will receive only sanitized operational metadata and will focus on the Data/BI workflow.
+The technical installation and administration of the hypervisor will belong in [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab). This repository will receive only sanitized operational metadata and will focus on the Data/BI workflow.
 
 ## Source domains
 
@@ -191,7 +191,7 @@ When hardware exists, the first extraction should follow these rules:
 | Concern | Repository |
 |---|---|
 | Physical switch, VLAN and trunk configuration | `cisco-switching-lab` |
-| Hypervisor, VM/LXC, storage, backup and API setup | `proxmox-virtualization-lab` |
+| Hypervisor, VM/LXC, storage, backup and API setup | [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab) |
 | Sanitized data model, SQL checks and Power BI | `network-operations-data-lab` |
 
 ## Portfolio standard
