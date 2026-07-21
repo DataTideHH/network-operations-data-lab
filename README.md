@@ -1,18 +1,20 @@
 # Network Operations Data Lab
 
-Network Operations Data Lab is a learning and portfolio project that connects networking fundamentals with a Data/BI workflow.
+Network Operations Data Lab is a learning and portfolio project that connects networking and infrastructure operations with a Data/BI workflow.
 
 Project page: https://datatidehh.github.io/network-operations-data-lab/
 
-The goal is not only to configure network devices, but to treat network operations as a structured data source.
+The goal is not only to configure infrastructure, but to treat operational systems as structured data sources.
+
+The current verified source domain is the Cisco switching lab. A future Proxmox virtualization lab is included in the data architecture roadmap, but no operational Proxmox host or real Proxmox API export is currently claimed.
 
 ## Project idea
 
-This lab explores how operational network data can be collected, cleaned, modeled, queried and visualized.
+This lab explores how operational infrastructure data can be collected, cleaned, modeled, queried and visualized.
 
-Relevant data sources include:
+Current and planned data sources include:
 
-- device inventory
+- network device inventory
 - interface status
 - VLAN documentation
 - trunk/access port information
@@ -20,11 +22,15 @@ Relevant data sources include:
 - configuration snapshots
 - basic availability checks
 - lab topology documentation
+- future Proxmox node and guest inventory
+- future virtual network and storage inventory
+- future backup-status and resource-allocation records
 
 ## Current and planned stack
 
 - Cisco switching and routing lab
-- Python for parsing and data preparation
+- future Proxmox virtualization lab and REST API
+- Python for parsing, API access and data preparation
 - CSV and SQLite for structured storage
 - SQL for analysis and validation
 - Power BI for reporting and dashboard prototypes
@@ -44,7 +50,9 @@ The networking foundation remains aligned with CCNA-level topics:
 - subnetting and Layer 3 concepts
 - network troubleshooting notes
 
-The Data/BI side focuses on turning those operational records into structured, validated and reportable sample data.
+The Data/BI side focuses on turning operational records into structured, validated and reportable sample data.
+
+Proxmox-related files currently document only the future data model and integration path. Real API collection should begin only after a dedicated x86 host has been installed, secured and validated in the separate `proxmox-virtualization-lab` repository.
 
 ## Current verified lab baseline
 
@@ -64,9 +72,9 @@ Real IP addresses, MAC addresses, serial numbers, hostnames and private network 
 
 This repository is designed to be public-safe.
 
-Real device identifiers, MAC addresses, public IP addresses, Tailscale IPs, serial numbers, hostnames and private network details must not be published here.
+Real device identifiers, MAC addresses, public IP addresses, Tailscale IPs, serial numbers, hostnames, Proxmox node names, VM names, API tokens, cluster fingerprints and private network details must not be published here.
 
-All examples should use anonymized or sample data.
+All examples should use anonymized or synthetic data.
 
 ## Why this project matters
 
@@ -74,39 +82,61 @@ For Data/BI work, operational IT systems are important data sources.
 
 This project demonstrates how infrastructure data can be transformed into useful reporting structures, combining:
 
-- networking fundamentals
+- networking and virtualization fundamentals
 - data preparation
 - SQL-based analysis
+- data-quality rules
 - BI-style visualization
 - technical documentation
 
+The longer-term portfolio story is intentionally cross-layer:
+
+```text
+Cisco physical network
+        |
+        v
+future Proxmox virtualization platform
+        |
+        v
+REST API / sanitized exports
+        |
+        v
+Python + SQLite + SQL data-quality workflow
+        |
+        v
+Power BI operational reporting
+```
+
 ## Repository structure
 
-    network-operations-data-lab/
-    ├── data/
-    │   ├── sample/
-    │   └── processed/
-    ├── docs/
-    │   ├── _config.yml
-    │   ├── index.md
-    │   ├── cisco-switch-baseline.md
-    │   ├── data-quality-rules.md
-    │   ├── lab-topology.md
-    │   ├── project-scope.md
-    │   └── vlan-lab-roadmap.md
-    ├── powerbi/
-    ├── scripts/
-    ├── sql/
-    ├── .gitignore
-    └── README.md
+```text
+network-operations-data-lab/
+├── data/
+│   ├── sample/
+│   └── processed/
+├── docs/
+│   ├── _config.yml
+│   ├── index.md
+│   ├── cisco-switch-baseline.md
+│   ├── data-quality-rules.md
+│   ├── lab-topology.md
+│   ├── project-scope.md
+│   ├── proxmox-data-integration-roadmap.md
+│   └── vlan-lab-roadmap.md
+├── powerbi/
+├── scripts/
+├── sql/
+├── .gitignore
+└── README.md
+```
 
 ## Status
 
 Active learning-lab / in progress.
 
-The repository already contains public-safe sample data, Python processing scripts, SQL analysis and validation files, an aggregated data-quality report and a GitHub Pages project landing page.
+The repository already contains public-safe Cisco sample data, Python processing scripts, SQL analysis and validation files, an aggregated data-quality report and a GitHub Pages project landing page.
 
-It is connected to my Data/BI Analyst track and my CCNA preparation by treating network operations as a structured reporting domain.
+It is connected to my Data/BI Analyst track and my CCNA preparation by treating infrastructure operations as a structured reporting domain. Proxmox is currently represented only as a carefully separated future data-source roadmap.
 
 ---
 
@@ -126,6 +156,8 @@ Current sample files:
 | `interfaces.csv` | Small anonymized interface dataset with admin status, operational status, VLAN and port role fields |
 
 The sample data is intentionally synthetic/anonymized and does not contain real serial numbers, MAC addresses, public IP addresses, private IP addresses or sensitive hostnames.
+
+Future Proxmox sample tables should remain separate from the current Cisco baseline until their schemas and source semantics are documented.
 
 ## Current scripts
 
@@ -159,6 +191,8 @@ The current SQL files demonstrate basic reporting and data-quality questions suc
 
 These queries are meant as a first bridge between networking documentation, data-quality checks and BI-style reporting logic.
 
+Future Proxmox checks may cover undocumented guests, missing ownership, stale backups, resource-allocation anomalies and invalid relationships between nodes, guests, storage and networks.
+
 ## Current data-quality report
 
 A public-safe data-quality report is generated under:
@@ -173,25 +207,34 @@ The current sample report contains one expected finding for check 11, because th
 
 This repository includes a small project landing page under:
 
-    docs/index.md
+```text
+docs/index.md
+```
 
 After GitHub Pages is enabled for the repository, the published site is available at:
 
-    https://datatidehh.github.io/network-operations-data-lab/
+```text
+https://datatidehh.github.io/network-operations-data-lab/
+```
 
 Recommended GitHub Pages settings:
 
-    Source: Deploy from a branch
-    Branch: main
-    Folder: /docs
+```text
+Source: Deploy from a branch
+Branch: main
+Folder: /docs
+```
 
 ## Next steps
 
 Planned next steps are intentionally incremental:
 
-1. load the sample CSV files into SQLite
-2. extend the sample data model with sanitized topology and port-description fields
+1. load the current sample CSV files into SQLite
+2. extend the current network sample model with sanitized topology and port-description fields
 3. add sanitized sample snapshots for interface description, interface status and MAC-table summaries
-4. document a small Power BI concept based on the sample tables
-5. continue the VLAN 10 / VLAN 20 / VLAN 30 roadmap only on lab-only ports
-6. keep real topology, configuration exports, IP addresses, MAC addresses and device identifiers out of the public repository
+4. document the future Proxmox source entities and public-safe sample schemas
+5. create synthetic `proxmox_nodes`, `proxmox_guests`, `proxmox_storage` and `proxmox_backups` datasets only after the model is reviewed
+6. build initial cross-source data-quality rules without claiming live API collection
+7. document a small Power BI concept based on the sample tables
+8. after dedicated hardware exists, replace selected synthetic assumptions with sanitized API-derived examples
+9. keep real topology, configurations, addresses, tokens, identifiers and account data out of the public repository
