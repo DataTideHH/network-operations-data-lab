@@ -52,7 +52,7 @@ The networking foundation remains aligned with CCNA-level topics:
 
 The Data/BI side focuses on turning operational records into structured, validated and reportable sample data.
 
-Proxmox-related files currently document only the future data model and integration path. Real API collection should begin only after a dedicated x86 host has been installed, secured and validated in the separate `proxmox-virtualization-lab` repository.
+Proxmox-related files currently document only the future data model and integration path. Real API collection should begin only after a dedicated x86 host has been installed, secured and validated in the separate [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab) repository.
 
 ## Current verified lab baseline
 

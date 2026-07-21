@@ -9,7 +9,7 @@ It is not intended to replace the separate technical labs. Instead, it adds the 
 ## Relationship to other repositories
 
 - `cisco-switching-lab` focuses on physical Cisco switching concepts, device configuration, VLANs, trunks and lab documentation.
-- the planned `proxmox-virtualization-lab` will focus on a future dedicated x86 virtualization host, virtual machines, LXC containers, storage, backups, permissions and API access.
+- the planned [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab) will focus on a future dedicated x86 virtualization host, virtual machines, LXC containers, storage, backups, permissions and API access.
 - `network-operations-data-lab` focuses on collecting, structuring, analyzing and visualizing sanitized operational data from those infrastructure layers.
 
 The Proxmox repository and live data source are not implemented yet. Until suitable hardware exists, this project should contain only reviewed schemas, synthetic examples and clearly labelled integration plans.
