@@ -1,97 +1,149 @@
 # Data Quality Rules
 
-This document describes the first public-safe data-quality checks for the Network Operations Data Lab.
+## Purpose
 
-The goal is to treat network documentation as structured operational data. Before this data can be used for SQL analysis or BI reporting, it should be checked for completeness, consistency and basic plausibility.
+The current workflow validates a public-safe three-table network-operations model before it is used for SQL analysis or BI reporting.
 
-## Current sample data
-
-Current sample inputs:
+Inputs:
 
 - `data/sample/devices.csv`
 - `data/sample/interfaces.csv`
+- `data/sample/topology_links.csv`
 
-Current device columns:
+Derived output:
 
-    device_id, device_name, device_type, vendor, model, role, location
+- `data/processed/data_quality_report.csv`
 
-Current interface columns:
+## Validation architecture
 
-    device_name, interface_name, interface_type, admin_status, oper_status, vlan, port_role, description
+### 1. Structural and type validation
 
-## Public-safe data rule
+Python enforces:
 
-The sample data must not contain real sensitive infrastructure details.
+- exact ordered CSV headers
+- non-empty input files
+- explicit Boolean conversion
+- explicit non-negative integer conversion
 
-Do not publish:
+SQLite then enforces:
 
-- real serial numbers
-- real MAC addresses
-- real public IP addresses
-- private hostnames
-- Tailscale IP addresses
-- customer-specific identifiers
-- production configuration snippets
+- primary keys
+- foreign keys
+- unique relationships
+- controlled-value `CHECK` constraints
+- non-negative speed values
 
-Use anonymized lab names and synthetic examples instead.
+Structural or load failures stop the workflow with a non-zero exit code.
 
-## Device inventory checks
+### 2. Aggregated SQL checks
 
-Recommended checks:
+`sql/data_quality_checks.sql` creates `data_quality_results`.
 
-- device inventory exists
-- device inventory is not empty
-- `device_id` is complete
-- `device_id` is unique
-- `device_name` is complete
-- `device_name` is unique
-- `device_type`, `vendor`, `model`, `role` and `location` are documented
+The public report contains only aggregated metadata. It does not expose row-level device, interface or topology identifiers.
 
-## Interface documentation checks
+## Categories and statuses
 
-Recommended checks:
+| Category | Status values | Interpretation |
+|---|---|---|
+| `data_quality` | `OK`, `FAIL` | completeness, validity, uniqueness or relationship integrity |
+| `operational_condition` | `OK`, `WARN` | plausible source data describing an operational exception |
+| `summary` | `INFO` | descriptive counts |
 
-- interface inventory exists
-- interface inventory is not empty
-- `device_name` is complete
-- `interface_name` is complete
-- each `device_name` + `interface_name` combination is unique
-- `admin_status` and `oper_status` are documented
-- `port_role` is documented
-- `description` is documented where useful
+This distinction prevents operational state from being confused with source-data quality.
 
-## Relationship checks
+## Current rule groups
 
-Recommended checks:
+### Inventory and identifier rules
 
-- every interface references a known `device_name` from `devices.csv`
-- device names are consistent between both files
-- no orphan interfaces exist
+- required device and interface identifiers
+- duplicate identifiers
+- required descriptive device attributes
+- controlled device scopes and active-state values
+- interface-to-device relationship validity
+- consistency between `device_id` and duplicated `device_name`
 
-## Reporting-oriented checks
+### Interface rules
 
-Recommended checks:
+- required names, type, statuses and VLAN documentation
+- controlled administrative and operational status values
+- controlled port-role and duplex values
+- non-negative and plausible speed values
+- description and `description_present` consistency
+- expected downstream cardinality by role
 
-- interfaces administratively up but operationally down
-- access ports without VLAN documentation
-- trunk ports without trunk documentation
-- missing interface descriptions
-- status and port-role summaries for BI reporting
+### Topology rules
 
-## Why this matters for BI
+- required and unique `link_id`
+- known source device and interface
+- known target device
+- validation of specific modeled target interfaces
+- controlled link role and link status
+- matching source-interface and link roles
+- duplicate directed relationship detection
+- active-link source-interface status
 
-Power BI reports and SQL analysis depend on reliable source data.
+### Operational conditions
 
-If device identifiers, interface names, port roles or VLAN documentation are incomplete, dashboards can become misleading. These checks are intentionally simple and transparent so they can be explained in a learning, portfolio and interview context.
+The current sample deliberately contains:
 
-## Current limitations
+```text
+one interface with admin_status=up and oper_status=down
+```
 
-This is an early learning-lab implementation.
+This produces:
 
-The current checks are based on public-safe sample CSV files. Later versions may add:
+```text
+category = operational_condition
+status   = WARN
+```
 
-- SQLite table creation
-- automated Python data-quality reports
-- additional SQL validation queries
-- Power BI dashboard prototypes
-- documented remediation notes
+It does not produce a data-quality failure because the record is complete, valid and internally consistent.
+
+## Report reproducibility
+
+Run:
+
+```bash
+python -m scripts.run_data_quality_checks
+```
+
+CI reruns the command and verifies:
+
+```bash
+git diff --exit-code -- data/processed/data_quality_report.csv
+```
+
+A source-data or rule change therefore requires a matching committed report update.
+
+## Strict mode
+
+The report command supports:
+
+```bash
+python -m scripts.run_data_quality_checks --strict
+```
+
+Exit codes:
+
+```text
+0  workflow succeeded and no data_quality FAIL exists
+1  file, schema, type, SQLite or execution error
+2  workflow succeeded but at least one data_quality FAIL exists
+```
+
+Operational warnings do not trigger strict-mode failure.
+
+## BI interpretation
+
+A reporting layer should expose data quality and operational exceptions separately.
+
+Recommended measures include:
+
+- data-quality pass rate
+- failed data-quality check count
+- operational warning count
+- documented-interface coverage
+- orphan relationship count
+- active interface count
+
+A single combined red/green score would hide the distinction between incorrect data and a correctly observed infrastructure condition.
