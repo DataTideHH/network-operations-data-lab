@@ -1,54 +1,105 @@
 # Scripts
 
-Python helper scripts for the network operations data lab.
+The current workflow uses only the Python standard library.
 
-The scripts are intentionally small and readable. They currently use only the Python standard library so the workflow remains easy to inspect and does not require a separate dependency setup.
+## Architecture
 
-## Current scripts
+```text
+workflow.py
+    shared CSV, SQLite and report functions
 
-- `load_sample_data.py`
-- `run_data_quality_checks.py`
+load_sample_data.py
+    inspect the three CSV contracts and summaries
 
-## `load_sample_data.py`
+build_sqlite_database.py
+    build the local SQLite database
 
-Loads the public-safe sample CSV files from `data/sample/`, prints the records and calculates simple summaries such as:
+run_sqlite_analysis.py
+    build a temporary database and print analysis views
 
-- device counts
-- interface operational status counts
-- port role counts
+run_data_quality_checks.py
+    build a temporary database and write the public report
+```
 
-Run:
+Run commands from the repository root with module syntax.
 
-`python scripts/load_sample_data.py`
+## Inspect the sample data
 
-## `run_data_quality_checks.py`
+```bash
+python -m scripts.load_sample_data
+```
 
-Runs a public-safe data-quality check workflow aligned with the numbered checks in `sql/data_quality_checks.sql`.
+The command verifies all three ordered headers and prints counts for:
 
-Input files:
+- devices
+- interfaces
+- topology links
+- interface operational status
+- port roles
+- link status
 
-- `data/sample/devices.csv`
-- `data/sample/interfaces.csv`
+## Build SQLite locally
 
-Output file:
+```bash
+python -m scripts.build_sqlite_database
+```
 
-- `data/processed/data_quality_report.csv`
+Default output:
 
-The report contains only aggregated check metadata:
+```text
+data/processed/network_operations.db
+```
 
-- check number
-- check name
-- category
-- status
-- affected row count
-- short description
+The database file is ignored by Git.
 
-It does not write device names, interface names or row-level identifiers.
+Alternative path:
 
-The duplicate checks count affected rows in the Python report, while the SQL version returns duplicate groups. Missing values are handled by the dedicated missing-value checks and are not double-counted as duplicates.
+```bash
+python -m scripts.build_sqlite_database --database path/to/lab.db
+```
 
-The current sample report contains one expected finding for check 11 because the synthetic interface sample includes an administratively up but operationally down interface. This is useful as a small demonstration that the validation workflow detects an operational data-quality issue.
+Use `--no-replace` to prevent replacement of an existing database.
 
-Run:
+## Run analysis views
 
-`python scripts/run_data_quality_checks.py`
+```bash
+python -m scripts.run_sqlite_analysis
+```
+
+This command uses a temporary database and leaves no binary artifact in the repository.
+
+## Generate the quality report
+
+```bash
+python -m scripts.run_data_quality_checks
+```
+
+Output:
+
+```text
+data/processed/data_quality_report.csv
+```
+
+Strict mode:
+
+```bash
+python -m scripts.run_data_quality_checks --strict
+```
+
+Strict mode returns exit code `2` only when a `data_quality` rule has `FAIL`. Operational warnings remain review items and do not make the workflow technically fail.
+
+## Exit codes
+
+```text
+0  completed successfully
+1  file, contract, conversion, SQLite or execution error
+2  strict-mode data-quality failure
+```
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -p "test_*.py" -v
+```
+
+No `requirements.txt` is needed.
