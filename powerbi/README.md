@@ -1,12 +1,17 @@
 # Power BI
 
-Power BI prototypes and dashboard documentation.
+The repository does not currently publish a `.pbix` or `.pbit` file.
 
-The `.pbix` files should stay local and should not be committed to this repository unless they are explicitly cleaned for public release.
+The current public artifact is:
 
-Recommended public-safe artifacts:
+- [`report-concept.md`](report-concept.md)
 
-- screenshots
-- data model notes
-- dashboard documentation
-- exported sample CSV files
+Local Power BI files remain ignored until a model is stable, reviewed and demonstrably free of private infrastructure data.
+
+Recommended public artifacts:
+
+- semantic-model documentation
+- DAX measure definitions in Markdown
+- sanitized screenshots
+- exported public-safe sample tables
+- documented limitations and refresh assumptions

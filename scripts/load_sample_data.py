@@ -1,43 +1,44 @@
-from csv import DictReader
-from pathlib import Path
+"""Load and summarize the three public-safe CSV sample tables."""
+
+from __future__ import annotations
+
 from collections import Counter
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-DATA_DIR = BASE_DIR / "data" / "sample"
+from scripts.workflow import load_sample_rows
 
 
-def load_csv(filename: str) -> list[dict[str, str]]:
-    path = DATA_DIR / filename
+def main() -> int:
+    try:
+        devices, interfaces, links = load_sample_rows()
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"ERROR: {exc}")
+        return 1
 
-    with path.open(newline="", encoding="utf-8") as file:
-        return list(DictReader(file))
+    print("Network operations sample-data summary")
+    print("=" * 38)
+    print(f"Devices:       {len(devices)}")
+    print(f"Interfaces:    {len(interfaces)}")
+    print(f"Topology links:{len(links):>5}")
+
+    print("\nInterface operational status")
+    for status, count in sorted(
+        Counter(row["oper_status"].strip().lower() for row in interfaces).items()
+    ):
+        print(f"- {status}: {count}")
+
+    print("\nPort roles")
+    for role, count in sorted(
+        Counter(row["port_role"].strip().lower() for row in interfaces).items()
+    ):
+        print(f"- {role}: {count}")
+
+    print("\nTopology link status")
+    for status, count in sorted(
+        Counter(row["link_status"].strip().lower() for row in links).items()
+    ):
+        print(f"- {status}: {count}")
+    return 0
 
 
-devices = load_csv("devices.csv")
-interfaces = load_csv("interfaces.csv")
-
-print("Devices")
-for device in devices:
-    print(device)
-
-print("\nInterfaces")
-for interface in interfaces:
-    print(interface)
-
-status_summary = Counter(
-    (row["admin_status"], row["oper_status"])
-    for row in interfaces
-)
-
-print("\nInterface status summary")
-for (admin_status, oper_status), count in status_summary.items():
-    print(f"{admin_status=}, {oper_status=}, count={count}")
-
-port_role_summary = Counter(
-    row["port_role"]
-    for row in interfaces
-)
-
-print("\nPort role summary")
-for port_role, count in port_role_summary.items():
-    print(f"{port_role=}, count={count}")
+if __name__ == "__main__":
+    raise SystemExit(main())

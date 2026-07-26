@@ -1,88 +1,111 @@
 # Lab Topology
 
-This document describes the current and planned lab topology in a public-safe way.
+## Current implemented data source
 
-## Current public-safe example topology
+The current public model represents a sanitized Cisco-oriented baseline:
 
 ```text
-Client devices
-     |
-     | Ethernet / Wi-Fi
-     |
-Home router / lab gateway
-     |
-     | Ethernet
-     |
+generalized home or lab gateway
+            |
+            v
+public-safe wireless or media bridge
+            |
+            v
 Cisco lab switch
-     |
-     | Access ports
-     |
-Lab clients / test devices
+       |          |
+       v          v
+lab client A   lab client B
 ```
 
-The current verified data source is the Cisco switching lab. No Proxmox host is currently part of the implemented topology.
+The committed data model represents:
+
+- five synthetic devices
+- five interfaces
+- three directed topology links
+
+It omits real addressing, hardware identifiers, account details and full private topology.
+
+## Current data flow
+
+```text
+devices.csv
+interfaces.csv
+topology_links.csv
+        |
+        v
+Python contract validation
+        |
+        v
+SQLite keys and constraints
+        |
+        v
+SQL analysis and quality views
+        |
+        v
+aggregated public-safe report
+        |
+        v
+Power BI report concept
+```
 
 ## Future cross-layer topology
 
 ```text
-Existing home LAN
-     |
-     | isolated lab path
-     |
-Cisco lab router / gateway
-     |
-     | VLANs and controlled switch ports
-     |
+existing home LAN
+        |
+        | controlled lab path
+        v
+future lab router or gateway
+        |
+        v
 Cisco lab switch
-     |
-     | initial access port, later optional 802.1Q trunk
-     |
+        |
+        | access port first
+        | optional later 802.1Q trunk
+        v
 future dedicated Proxmox host
-     |
-     | virtual networks
-     |
-VMs / LXC containers
-     |
-     | REST API and sanitized exports
-     |
+        |
+        v
+VMs and LXC containers
+        |
+        | private raw API collection
+        v
+review and sanitization boundary
+        |
+        v
 network-operations-data-lab
-     |
-     | Python / SQLite / SQL
-     |
-Power BI reporting concept
 ```
 
-The future Proxmox host shown here is a roadmap item pending suitable dedicated x86 hardware. The diagram does not claim a working installation.
+The separate Proxmox repository contains a validated pre-hardware design. No dedicated host or live API source is currently implemented.
 
-## Data-flow boundaries
+## Repository ownership
 
-- the Cisco repository owns physical ports, VLANs, trunks and switch verification
-- the future Proxmox repository owns hypervisor, virtual network, guest, storage and backup documentation
-- this repository owns sanitized exports, data modelling, data-quality checks and BI-oriented outputs
+| Layer | Owning repository |
+|---|---|
+| physical switch, IOS, VLAN and trunk validation | `cisco-switching-lab` |
+| hypervisor, guests, storage, backup and API access | `proxmox-virtualization-lab` |
+| sanitized model, SQLite, SQL, quality checks and BI | `network-operations-data-lab` |
 
-## Privacy note
+## Privacy boundary
 
-Do not publish real values for:
+Do not publish:
 
-- public IP addresses
-- private management IP addresses
-- Tailscale IP addresses
-- real MAC addresses
+- real private or public addresses
+- MAC addresses
 - serial numbers
-- personal hostnames
-- ISP account details
-- full production-like configurations
-- Proxmox node, cluster or guest names derived from real systems
-- API tokens, ticket cookies, fingerprints or backup credentials
+- private hostnames
+- API tokens or ticket cookies
+- cluster fingerprints
+- raw configuration exports
+- complete private topology
+- backup credentials
 
-Use anonymized names such as:
+Use synthetic identifiers such as:
 
-- `lab-switch-01`
-- `client-01`
-- `pve-node-01`
-- `vm-data-01`
-- `lxc-tools-01`
-- `vlan-10-users`
-- `vlan-20-lab`
-- `vlan-30-servers`
-- `vlan-99-management`
+```text
+dev-001
+int-001
+link-001
+pve-node-01
+vm-data-01
+```

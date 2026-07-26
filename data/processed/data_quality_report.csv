@@ -1,33 +1,48 @@
 check_no,check_name,category,status,affected_rows,description
 1,Row count: devices,summary,INFO,5,Total number of rows in devices.csv.
 1,Row count: interfaces,summary,INFO,5,Total number of rows in interfaces.csv.
-2,Missing device identifiers,issue,OK,0,Devices with a missing or empty device_id.
-3,Duplicate device IDs,issue,OK,0,Rows sharing a non-empty device_id with at least one other row.
-4,Missing device names,issue,OK,0,Devices with a missing or empty device_name.
-5,Duplicate device names,issue,OK,0,Rows sharing a non-empty device_name with at least one other row.
-6,Missing interface device references,issue,OK,0,Interfaces with a missing or empty device_name reference.
-7,Missing interface names,issue,OK,0,Interfaces with a missing or empty interface_name.
-8,Duplicate interface rows per device,issue,OK,0,Rows sharing the same device_name + interface_name with another row.
-9,Interfaces referencing unknown devices,issue,OK,0,Interfaces whose device_name does not exist in devices.csv.
-10,Missing administrative or operational status,issue,OK,0,Interfaces with a missing admin_status or oper_status.
-11,Admin up but operationally down,issue,FAIL,1,Interfaces admin up while operationally down/notconnect.
-12,Access ports without VLAN documentation,issue,OK,0,Access ports with a missing or empty vlan value.
-13,Trunk ports without trunk documentation,issue,OK,0,Trunk ports whose vlan field is not set to 'trunk'.
-14,Missing interface descriptions,issue,OK,0,Interfaces with a missing or empty description.
-15,Device count by role (distinct roles),summary,INFO,4,Number of distinct device roles present in devices.csv.
-16,Interface status summary (distinct combinations),summary,INFO,2,Number of distinct admin_status/oper_status combinations.
-17,Port role summary (distinct roles),summary,INFO,4,Number of distinct port roles present in interfaces.csv.
+2,Missing device identifiers,data_quality,OK,0,Devices with a missing or empty device_id.
+3,Duplicate device IDs,data_quality,OK,0,Rows sharing a non-empty device_id with another row.
+4,Missing device names,data_quality,OK,0,Devices with a missing or empty device_name.
+5,Duplicate device names,data_quality,OK,0,Rows sharing a non-empty device_name with another row.
+6,Missing interface device references,data_quality,OK,0,Interfaces with a missing or empty device_name reference.
+7,Missing interface names,data_quality,OK,0,Interfaces with a missing or empty interface_name.
+8,Duplicate interface rows per device,data_quality,OK,0,Rows sharing the same device_id and interface_name with another row.
+9,Interfaces referencing unknown device names,data_quality,OK,0,Interfaces whose device_name does not exist in devices.
+10,Missing administrative or operational status,data_quality,OK,0,Interfaces with a missing admin_status or oper_status.
+11,Admin up but operationally down,operational_condition,WARN,1,Interfaces admin up while operationally down or not connected.
+12,Access-family ports without VLAN documentation,data_quality,OK,0,Access-family ports with a missing VLAN value.
+13,Trunk ports without trunk documentation,data_quality,OK,0,Trunk ports whose vlan field is not set to trunk.
+14,Missing interface descriptions,data_quality,OK,0,Interfaces with a missing or empty description.
+15,Device count by role: distinct roles,summary,INFO,4,Number of distinct device roles present.
+16,Interface status summary: distinct combinations,summary,INFO,2,Number of distinct administrative and operational status combinations.
+17,Port role summary: distinct roles,summary,INFO,4,Number of distinct port roles present.
 18,Row count: topology_links,summary,INFO,3,Total number of rows in topology_links.csv.
-19,Interfaces with unknown device_id,issue,OK,0,Interfaces whose device_id does not exist in devices.csv.
-20,Duplicate interface IDs,issue,OK,0,Rows in interfaces.csv sharing a non-empty interface_id with another row.
-21,Duplicate device_id + interface_name pairs,issue,OK,0,Rows sharing the same device_id + interface_name with another row.
-22,Interfaces with unexpected port_role,issue,OK,0,"port_role outside the allowed list: ['access', 'bridge_uplink', 'client_access', 'lab_access', 'trunk', 'uplink']."
-23,Invalid description_present values,issue,OK,0,description_present values other than 'true' or 'false'.
-24,Active interfaces without description,issue,OK,0,Interfaces with admin_status=up and oper_status=up but an empty description.
-25,Uplink interfaces with unexpected downstream cardinality,issue,OK,0,port_role=uplink interfaces where expected_downstream_devices is not 'multiple'.
-26,client_access interfaces with unexpected downstream cardinality,issue,OK,0,port_role=client_access interfaces where expected_downstream_devices is not 'single'.
-27,Topology links with unknown source_device_id,issue,OK,0,Links whose source_device_id does not exist in devices.csv.
-28,Topology links with unknown source_interface_id,issue,OK,0,"Links whose (source_device_id, source_interface_id) pair does not exist in interfaces.csv."
-29,Topology links with unknown target_device_id,issue,OK,0,Links whose target_device_id does not exist in devices.csv.
-30,Active links with source interface not operationally up,issue,OK,0,link_status=active links whose source interface is missing or not oper_status=up.
-31,Links where link_role does not match source port_role,issue,OK,0,Links whose link_role differs from the port_role of their source interface (links with an unresolved source interface are excluded here -- see check 28).
+19,Interfaces with unknown device_id,data_quality,OK,0,Interfaces whose device_id does not exist in devices.
+20,Duplicate interface IDs,data_quality,OK,0,Rows sharing a non-empty interface_id with another row.
+21,Duplicate device_id and interface_name pairs,data_quality,OK,0,Rows sharing the same device_id and interface_name with another row.
+22,Interfaces with unexpected port_role,data_quality,OK,0,Interfaces whose port_role is outside the controlled vocabulary.
+23,Invalid description_present values,data_quality,OK,0,Interfaces with description_present outside the Boolean domain.
+24,Active interfaces without description,data_quality,OK,0,Operationally active interfaces without a description.
+25,Uplink interfaces with unexpected downstream cardinality,data_quality,OK,0,Uplink interfaces not documented with multiple downstream devices.
+26,Client access interfaces with unexpected downstream cardinality,data_quality,OK,0,Client access interfaces not documented with one downstream device.
+27,Topology links with unknown source_device_id,data_quality,OK,0,Links whose source_device_id does not exist in devices.
+28,Topology links with unknown source interface,data_quality,OK,0,Links whose source device and interface pair does not exist.
+29,Topology links with unknown target_device_id,data_quality,OK,0,Links whose target_device_id does not exist in devices.
+30,Active links with source interface not operationally up,operational_condition,OK,0,Active links whose source interface is missing or not operationally up.
+31,Links where link_role does not match source port_role,data_quality,OK,0,Links whose role differs from the source interface port role.
+32,Devices with missing required attributes,data_quality,OK,0,Devices missing a required descriptive attribute.
+33,Invalid device active-state values,data_quality,OK,0,Devices with is_active outside the Boolean domain.
+34,Devices with unexpected scope values,data_quality,OK,0,Devices with location_scope or management_scope outside the controlled vocabulary.
+35,Missing interface identifiers,data_quality,OK,0,Interfaces with a missing interface_id.
+36,Interface device names inconsistent with device IDs,data_quality,OK,0,Interfaces whose device_name does not match the referenced device_id.
+37,Interfaces with unexpected status values,data_quality,OK,0,Interfaces with status values outside the controlled vocabularies.
+38,Interfaces with implausible speed values,data_quality,OK,0,Interfaces with a negative speed or an operationally up link without positive speed.
+39,Interfaces with unexpected duplex values,data_quality,OK,0,Interfaces with duplex outside the controlled vocabulary.
+40,Interface description flag mismatches,data_quality,OK,0,Interfaces where description_present disagrees with the description text.
+41,Missing or duplicate topology link IDs,data_quality,OK,0,Topology links with a missing link_id or an ID shared by multiple rows.
+42,Topology links with unexpected status values,data_quality,OK,0,Topology links with link_status outside the controlled vocabulary.
+43,Unexpected downstream cardinality values,data_quality,OK,0,Interface or topology rows with downstream cardinality outside the controlled vocabulary.
+44,Duplicate topology relationships,data_quality,OK,0,Rows describing the same directed source and target relationship more than once.
+45,Topology links with unresolved modeled target interfaces,data_quality,OK,0,Links with a specific target_interface_id that is not present in interfaces.
+46,Interfaces with missing interface type,data_quality,OK,0,Interfaces with a missing interface_type.
