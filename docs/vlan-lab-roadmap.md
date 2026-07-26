@@ -1,130 +1,114 @@
 # VLAN Lab Roadmap
 
-This document describes the planned VLAN structure for the Cisco switching lab.
+## Status and repository boundary
 
-The goal is to learn VLAN design, access ports, trunks, management SVIs and troubleshooting without disrupting the productive home network.
+This document mirrors the planned VLAN roles from `cisco-switching-lab`. It exists here only to keep the operational data model aligned with the network design.
 
-## Planned VLAN model
+Cisco CLI implementation and validation belong in the Cisco repository.
 
-| VLAN | Name | Purpose |
+## Planned VLAN roles
+
+| VLAN | Role | Intended analytical label |
 |---:|---|---|
-| 10 | MGMT | Management network for switch and future lab infrastructure |
-| 20 | CLIENTS | Normal client devices in a controlled lab scenario |
-| 30 | LAB_IOT | Lab devices, test nodes and future isolated experiments |
-| 999 | NATIVE_UNUSED | Unused native VLAN for trunk hardening practice |
+| 10 | test clients | `TEST_CLIENTS` |
+| 20 | lab systems | `LAB_SYSTEMS` |
+| 30 | test services and servers | `TEST_SERVICES` |
+| 99 | management | `MGMT` |
+| 998 | unused native VLAN for lab trunks | `NATIVE_UNUSED` |
+| 999 | parking VLAN for shut unused access ports | `BLACKHOLE` |
 
-## Important design note
+## Design rules
 
-The current home router remains responsible for normal internet access, DHCP and DNS.
+- VLAN 99 is the planned management VLAN.
+- VLAN 998 is used only as the matching unused native VLAN on both trunk ends.
+- VLAN 998 has no SVI and no connected endpoint.
+- VLAN 999 is reserved for administratively shut unused access ports.
+- VLAN 999 is not the trunk native VLAN.
+- Productive home-network connectivity is not moved during early lab phases.
+- Console or independent recovery access is retained before management or trunk changes.
 
-The VLAN roadmap will be implemented incrementally. Productive client connectivity should not be moved until the router, switch and remote access paths are stable.
+## Phase 1: define VLANs without moving active ports
 
-## Phase 1: Create VLANs only
-
-Create the VLANs without changing productive access ports.
-
-Example:
+Conceptual Cisco-side configuration:
 
 ```text
-configure terminal
 vlan 10
- name MGMT
+ name TEST_CLIENTS
 vlan 20
- name CLIENTS
+ name LAB_SYSTEMS
 vlan 30
- name LAB_IOT
-vlan 999
+ name TEST_SERVICES
+vlan 99
+ name MGMT
+vlan 998
  name NATIVE_UNUSED
-end
-write memory
+vlan 999
+ name BLACKHOLE
 ```
 
-Validation:
+Validation belongs in `cisco-switching-lab` and should include the effective VLAN table before any access-port change.
+
+## Phase 2: isolated access-port tests
+
+Use only unused lab ports.
+
+Conceptual assignments:
 
 ```text
-show vlan brief
+test client port    -> VLAN 10
+lab system port     -> VLAN 20
+test service port   -> VLAN 30
+unused shut port    -> VLAN 999
 ```
 
-## Phase 2: Test access ports
+The data model should capture:
 
-Use unused switch ports for lab-only testing.
+- interface identifier
+- port role
+- VLAN assignment
+- administrative state
+- operational state
+- public-safe description
 
-Example:
+## Phase 3: management VLAN
+
+Move management from VLAN 1 only after:
+
+- local console recovery is confirmed
+- routing and reachability are planned
+- the existing management path is documented
+- rollback steps are available
+
+The planned management SVI belongs to VLAN 99, not VLAN 10.
+
+## Phase 4: lab-only trunk
+
+Conceptual trunk design:
 
 ```text
-configure terminal
-interface gi0/4
- description LAB_CLIENT_ACCESS_VLAN20
- switchport mode access
- switchport access vlan 20
- spanning-tree portfast
-
-interface gi0/5
- description LAB_NODE_ACCESS_VLAN30
- switchport mode access
- switchport access vlan 30
- spanning-tree portfast
-end
-write memory
+allowed VLANs: 10,20,30,99
+native VLAN:   998
 ```
 
-Validation:
+VLAN 999 remains excluded from normal trunk use.
 
-```text
-show interfaces status
-show vlan brief
-show mac address-table
-```
+Data-quality checks should later verify:
 
-## Phase 3: Management VLAN
+- documented allowed VLANs
+- native VLAN consistency
+- no SVI or endpoint assignment on VLAN 998
+- unused ports assigned to VLAN 999 and administratively down
 
-Move switch management away from VLAN 1 only after the lab topology is stable.
+## Phase 5: operational data collection
 
-Example concept:
+After the network stage is verified, public-safe source records may include:
 
-```text
-interface vlan 10
- description MANAGEMENT_SVI
- ip address <sanitized-management-ip> <sanitized-mask>
- no shutdown
-```
-
-This requires a valid routing and reachability plan. It should not be implemented blindly.
-
-## Phase 4: Trunking practice
-
-Use a lab-only trunk to a second switch, router, Linux host, hypervisor or VLAN-aware firewall.
-
-Example concept:
-
-```text
-interface gi0/8
- description LAB_TRUNK
- switchport mode trunk
- switchport trunk native vlan 999
- switchport trunk allowed vlan 10,20,30
-```
-
-Validation:
-
-```text
-show interfaces trunk
-show vlan brief
-show spanning-tree
-```
-
-## Phase 5: Operational data collection
-
-Once the lab is stable, sanitized outputs can be transformed into structured data.
-
-Candidate data sources:
-
-- interface status
+- interface status summaries
 - VLAN membership
-- trunk configuration
-- MAC address table summaries
+- trunk role and allowed-VLAN documentation
 - STP state summaries
-- device inventory without real identifiers
-- basic availability checks
+- MAC-table counts without real addresses
+- error-counter summaries
+- configuration snapshot timestamps
 
-All collected data must be anonymized before it is used in this public repository.
+No raw private output should be committed.
