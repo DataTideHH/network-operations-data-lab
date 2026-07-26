@@ -1,199 +1,152 @@
 # Proxmox Data Integration Roadmap
 
-## Status
+## Current status
 
-This document defines a future data source and does not represent an operational Proxmox environment. A dedicated x86 host has not yet been acquired.
+The separate [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab) repository contains a validated pre-hardware design, public-safety rules, a synthetic inventory example and a tested validator.
 
-## Objective
+A dedicated x86 host, operational Proxmox installation and live API source do not currently exist.
 
-The future Proxmox integration should demonstrate how virtualization operations data can be collected, modelled, validated and reported without exposing private infrastructure details.
+This document therefore remains a source-integration roadmap. It does not claim live virtualization data.
 
-The technical installation and administration of the hypervisor will belong in [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab). This repository will receive only sanitized operational metadata and will focus on the Data/BI workflow.
+## Initial reviewed boundary
 
-## Source domains
+The current pre-hardware public schema `0.1` covers only:
 
-The first useful source entities are intentionally small:
+- nodes
+- guests
 
-| Entity | Example analytical purpose |
-|---|---|
-| nodes | host inventory, status and resource capacity |
-| guests | VM and LXC inventory, lifecycle status and ownership |
-| storage | capacity, utilization and availability |
-| networks | bridge and VLAN assignment coverage |
-| backups | policy coverage, status and freshness |
-| snapshots | lifecycle and retention review |
-| collection runs | extraction timestamp, status and row counts |
+Storage, network-assignment and backup-run entities remain deferred until real API fields and source semantics have been reviewed.
 
-## Proposed public-safe sample tables
+## Proposed node grain
 
-### `proxmox_nodes`
+One row per sanitized node at one collection state.
 
-- `node_key`
-- `node_status`
-- `cpu_threads`
-- `memory_total_mb`
-- `storage_total_gb`
-- `environment`
-- `source_timestamp_utc`
-- `collected_at_utc`
+Candidate fields:
 
-### `proxmox_guests`
+```text
+node_key
+node_status
+cpu_threads
+memory_total_mb
+storage_total_gb
+source_observed_at_utc
+collected_at_utc
+collection_run_key
+```
 
-- `guest_key`
-- `node_key`
-- `guest_type`
-- `guest_status`
-- `purpose_category`
-- `owner_role`
-- `cpu_allocated`
-- `memory_allocated_mb`
-- `backup_policy_key`
-- `environment`
-- `source_timestamp_utc`
-- `collected_at_utc`
+## Proposed guest grain
 
-### `proxmox_storage`
+One row per sanitized VM or LXC guest at one collection state.
 
-- `storage_key`
-- `node_key`
-- `storage_type`
-- `content_types`
-- `capacity_total_gb`
-- `capacity_used_gb`
-- `storage_status`
-- `collected_at_utc`
+Candidate fields:
 
-### `proxmox_network_assignments`
+```text
+guest_key
+node_key
+guest_type
+guest_status
+purpose_category
+owner_role
+cpu_allocated
+memory_allocated_mb
+backup_policy_key
+source_observed_at_utc
+collected_at_utc
+collection_run_key
+```
 
-- `assignment_key`
-- `guest_key`
-- `bridge_key`
-- `vlan_key`
-- `interface_role`
-- `collected_at_utc`
+Keys must be synthetic public identifiers, not real node names, VM IDs or storage IDs.
 
-### `proxmox_backups`
-
-- `backup_event_key`
-- `guest_key`
-- `backup_policy_key`
-- `backup_status`
-- `started_at_utc`
-- `finished_at_utc`
-- `age_hours_at_collection`
-- `collected_at_utc`
-
-The keys above should be synthetic public identifiers, not real node names, VM IDs or storage IDs.
-
-## Initial data-quality rules
+## Initial quality rules
 
 ### Completeness
 
-- every guest has a guest type and lifecycle status
-- every running guest has a documented purpose category
-- every non-temporary guest has an owner role
-- every protected guest has a backup policy
+- each node and guest has a stable synthetic key
+- each guest has a reviewed type and lifecycle status
+- each non-temporary guest has a purpose and owner role
+- required collection timestamps are present
 
-### Referential integrity
+### Relationships
 
-- every guest references a known node
-- every storage record references a known node
-- every network assignment references a known guest
-- every backup event references a known guest and policy
+- each guest references a known node
+- collection-run relationships are complete
+- no orphan guest rows exist
 
 ### Validity
 
-- CPU and memory allocations are non-negative
-- used storage does not exceed total storage
-- allowed guest types are limited to reviewed values such as `qemu` and `lxc`
-- lifecycle and backup status values use controlled vocabularies
+- guest types use reviewed values such as `qemu` and `lxc`
+- CPU and memory values are non-negative
+- source timestamps are not later than collection timestamps
+- status values use controlled vocabularies
 
 ### Freshness
 
-- collection timestamps are present
-- source timestamps are not later than collection timestamps
-- the newest backup remains within its documented policy threshold
-- inventory extracts are not older than the reporting service-level target
-
-### Policy and documentation
-
-- production-like labels are not used for temporary learning guests
-- management network assignments follow the documented design
-- stopped or archived guests have an explicit retention decision
-- snapshots older than the agreed threshold are flagged for review
-
-## Candidate KPIs
-
-- running, stopped and template guests
-- VM versus LXC distribution
-- allocated CPU and memory by purpose category
-- host resource allocation ratio
-- storage utilization by node and storage type
-- backup success rate
-- guests without current backup
-- guests without documented owner or purpose
-- stale inventory collections
-- management, server and lab network assignment coverage
+- collection age is measurable
+- reporting distinguishes source observation from collection time
+- stale collection runs are flagged against a documented threshold
 
 ## Extraction principles
 
-When hardware exists, the first extraction should follow these rules:
+After hardware exists:
 
 1. use a dedicated least-privilege API token
-2. request only fields required for the defined model
-3. never commit tokens, ticket cookies or raw private responses
-4. separate collection from sanitization
-5. retain collection logs without sensitive payloads
-6. keep raw private extracts outside the public repository
-7. publish only synthetic or reviewed anonymized examples
-8. distinguish source time from collection time
-9. document API assumptions and version dependencies
+2. review exact API paths and fields
+3. collect raw responses privately
+4. keep token secrets and raw payloads outside Git
+5. separate collection from sanitization
+6. preserve source and collection timestamps
+7. map private identifiers to synthetic public keys
+8. compare actual fields with the planned schema
+9. revise the model before publishing examples
+10. document API and release assumptions
 
-## Incremental implementation plan
+## Deferred source entities
 
-### Phase 0: schema-only roadmap
+These may be added only after live field review:
 
-- review entity and field definitions
-- create synthetic CSV examples
-- define controlled vocabularies
-- write SQL DDL and initial checks
+- storage inventory
+- virtual network assignments
+- backup events and policies
+- snapshot lifecycle
+- resource utilization observations
+- extraction-run metadata beyond the minimum collection key
 
-### Phase 1: local synthetic workflow
+## Implementation phases
 
-- load sample tables into SQLite
-- implement Python validation
-- generate an aggregated quality report
-- draft a Power BI semantic model
+### Phase 0 — current
 
-### Phase 2: first live private extraction
+- maintain the reviewed nodes-and-guests schema boundary
+- keep public examples synthetic
+- do not claim live extraction
 
-- install and secure the separate Proxmox lab
-- create a least-privilege token
-- perform a private local API export
-- compare actual fields with the planned schema
-- revise the model before publishing examples
+### Phase 1 — dedicated host and private source review
 
-### Phase 3: sanitized portfolio integration
+- install and validate the separate Proxmox lab
+- create a least-privilege read-only token
+- collect one private sample
+- inspect actual fields and null behavior
+- document source semantics
 
-- map real source semantics to synthetic public identifiers
-- publish reviewed sample extracts
-- document extraction, transformation and validation
-- add selected cross-layer relationships to Cisco inventory
+### Phase 2 — local analytical integration
 
-### Phase 4: reporting
+- map reviewed data to SQLite staging tables
+- add referential and freshness checks
+- compare network and virtualization collection grains
+- keep private identifiers outside the public repository
 
-- build Power BI measures and quality indicators
-- document limitations and collection frequency
-- publish only reviewed screenshots without private identifiers
+### Phase 3 — public-safe portfolio sample
+
+- publish only synthetic or reviewed sanitized examples
+- document transformation and limitations
+- extend the Power BI concept with virtualization pages
+- publish screenshots only after privacy review
 
 ## Repository boundaries
 
 | Concern | Repository |
 |---|---|
-| Physical switch, VLAN and trunk configuration | `cisco-switching-lab` |
-| Hypervisor, VM/LXC, storage, backup and API setup | [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab) |
-| Sanitized data model, SQL checks and Power BI | `network-operations-data-lab` |
+| physical switching and VLAN configuration | `cisco-switching-lab` |
+| Proxmox installation, guests, storage, backup and API access | `proxmox-virtualization-lab` |
+| sanitized source model, SQLite, SQL, quality checks and BI | `network-operations-data-lab` |
 
-## Portfolio standard
-
-The value of this integration comes from traceability: source definition, collection boundary, data model, validation rules, reporting logic and explicit limitations. A screenshot of the Proxmox web interface alone is not considered a meaningful Data/BI artifact.
+The analytical value comes from traceability across source definition, collection boundary, model, validation and reporting—not from a Proxmox web-interface screenshot.
