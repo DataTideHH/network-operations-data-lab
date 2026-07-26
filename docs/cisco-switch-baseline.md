@@ -1,111 +1,56 @@
 # Cisco Switch Baseline
 
-This document describes the public-safe baseline for a small Cisco switching lab.
+## Purpose
 
-The goal is not to publish real device configuration, but to document the learning setup, validation steps and operational data concepts in an anonymized way.
+This document describes the public-safe source context for the current data workflow. Detailed Cisco procedures and verified device maintenance belong in [`cisco-switching-lab`](https://github.com/DataTideHH/cisco-switching-lab).
 
-## Scope
+## Verified source context
 
-The lab uses a compact Cisco Catalyst switch as a local CCNA-level switching platform.
+The private physical lab has verified:
 
-The current baseline focuses on:
+- local console access
+- SSH administration
+- stable management reachability
+- active Gigabit Ethernet links
+- public-safe interface descriptions
+- gateway and external reachability
+- disabled Telnet and web management
+- saved baseline configuration
 
-- basic Layer 2 switching
-- local management access
-- SSH-based administration
-- public-safe interface documentation
-- later VLAN and trunking exercises
-- later collection of sanitized operational data
+Real hostnames, addresses, serial numbers, MAC addresses, credentials and full configurations are excluded.
 
-## Current baseline state
+## Current public data artifacts
 
-The hardware baseline has been verified in a local home-lab environment.
+The network data repository now implements:
 
-Verified capabilities:
+- synthetic device inventory
+- synthetic interface baseline
+- synthetic topology relationships
+- exact CSV contracts
+- SQLite loading and constraints
+- SQL analysis and quality views
+- an aggregated public-safe report
+- automated tests and CI
 
-- switch boots successfully
-- local console access works, including a macOS USB-serial workflow
-- management SVI receives an address via DHCP
-- management address is stabilized through a local router DHCP reservation
-- connected client ports negotiate at 1 Gbit/s full duplex
-- one uplink path and two client-facing links have public-safe interface descriptions
-- local router is reachable from the switch
-- external reachability checks from the switch are successful
-- connected clients can access the network through the switch
-- SSH access is enabled for local management
-- Telnet is disabled
-- HTTP and HTTPS web management are disabled
-- automatic configuration download and provisioning features are disabled for the lab context
-- baseline configuration changes are saved to startup configuration
+The topology and port-description fields are no longer future tasks; they are part of the implemented model.
 
-## Management model
+## Current limitations
 
-The switch is managed through:
+- the public sample is static
+- no raw CLI output is committed
+- no interface error-counter snapshot is yet modeled
+- no historical collection timestamps exist
+- VLAN 10/20/30/99/998/999 remain a planned segmented lab stage
+- Proxmox remains a future source
 
-- local console access for recovery and initial setup
-- SSH for normal local administration
+## Next source expansion
 
-The web interface is intentionally not used.
+A useful next network-data increment would be one reviewed snapshot table with:
 
-## Public-safe handling
+- a synthetic snapshot key
+- source observation time
+- collection time
+- selected interface status or counter values
+- documented sanitization rules
 
-Real configuration exports must not be committed to this repository.
-
-Do not publish:
-
-- real serial numbers
-- real MAC addresses
-- real hostnames
-- real management IP addresses
-- public IP addresses
-- Tailscale IP addresses
-- password hashes
-- user secrets
-- full running-config or startup-config outputs from real devices
-
-Only sanitized examples and synthetic sample data should be used.
-
-## Useful verification commands
-
-The following commands are useful for documenting the lab state without publishing sensitive raw output:
-
-```text
-show version
-show boot
-show ip interface brief
-show interfaces status
-show interfaces description
-show vlan brief
-show mac address-table dynamic
-show running-config | section line vty
-show running-config | include ip http|ip ssh|domain-lookup
-show users
-ping <local-gateway-ip>
-ping <external-test-ip>
-```
-
-Any resulting output must be reviewed and sanitized before publication.
-
-## Current sanitized topology concept
-
-The verified private lab can be represented publicly only as a generic topology pattern:
-
-```text
-LAB_ROUTER
-  -> local wireless bridge / media bridge
-LAB_SWITCH_01
-  -> LAB_CLIENT_A
-  -> LAB_CLIENT_B
-```
-
-This intentionally omits the real router model, real repeater model, real switch hostname, real client names, IP addresses, MAC addresses and serial numbers.
-
-## Next steps
-
-Planned next steps:
-
-1. create sanitized sample outputs based on the verified baseline
-2. extend the sample CSV model with topology and port-description fields
-3. add SQLite import and validation logic for the extended sample data
-4. document VLAN 10 / VLAN 20 / VLAN 30 as a lab roadmap
-5. keep real configuration exports, private addressing and real device identifiers outside the public repository
+That extension should be added only after the snapshot grain and retention purpose are defined.
