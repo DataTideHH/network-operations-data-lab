@@ -2,69 +2,90 @@
 
 ## Purpose
 
-This project connects infrastructure operations with data analysis, data quality and BI reporting.
+This project connects infrastructure operations with data analysis, data quality, SQL and BI-oriented reporting.
 
-It is not intended to replace the separate technical labs. Instead, it adds the data layer above networking and, later, virtualization practice.
+It does not replace the separate technical labs. It provides the analytical layer above network operations and, later, virtualization operations.
+
+## Current implemented phase
+
+The current Cisco-oriented static sample workflow is implemented:
+
+1. three public-safe CSV source tables
+2. explicit Python header and type validation
+3. reproducible SQLite database build
+4. SQL analysis and data-quality views
+5. aggregated public-safe report generation
+6. unit tests and Python 3.12 CI
+7. a documented Power BI report concept
+
+The current model is intentionally small and explainable. It is not presented as a monitoring platform, CMDB or enterprise data warehouse.
 
 ## Relationship to other repositories
 
-- `cisco-switching-lab` focuses on physical Cisco switching concepts, device configuration, VLANs, trunks and lab documentation.
-- the planned [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab) will focus on a future dedicated x86 virtualization host, virtual machines, LXC containers, storage, backups, permissions and API access.
-- `network-operations-data-lab` focuses on collecting, structuring, analyzing and visualizing sanitized operational data from those infrastructure layers.
+- [`cisco-switching-lab`](https://github.com/DataTideHH/cisco-switching-lab) owns the physical Cisco device, IOS maintenance, VLANs, trunks and switching validation.
+- [`proxmox-virtualization-lab`](https://github.com/DataTideHH/proxmox-virtualization-lab) contains the validated pre-hardware design for a future dedicated virtualization host.
+- `network-operations-data-lab` owns the sanitized source model, SQLite workflow, SQL checks, quality report and BI-oriented outputs.
 
-The Proxmox repository and live data source are not implemented yet. Until suitable hardware exists, this project should contain only reviewed schemas, synthetic examples and clearly labelled integration plans.
+The Proxmox repository exists and its pre-hardware phase is validated. A dedicated host, operational Proxmox deployment and live API source do not currently exist.
 
-## Initial phase
+## Current source boundary
 
-The current phase should stay simple:
+Implemented public tables:
 
-1. Define sample network inventory data.
-2. Define sample interface status data.
-3. Load the data with Python.
-4. Prepare it for SQL analysis.
-5. Build simple BI-style summary tables.
-6. Load the current model into SQLite.
-7. Later: visualize selected KPIs in Power BI.
+- devices
+- interfaces
+- topology links
+
+Implemented derived artifacts:
+
+- SQLite analysis views
+- aggregated data-quality report
+
+The current source is a static synthetic baseline. It is not a historical snapshot feed.
 
 ## Future Proxmox phase
 
-After the separate virtualization lab is installed and validated:
+After a dedicated host has been installed and validated:
 
-1. Define the API extraction boundary and least-privilege token requirements.
-2. Export only required node, guest, storage, network and backup metadata.
-3. Sanitize identifiers before publishing examples.
-4. Preserve source timestamps and collection timestamps separately.
-5. Load the data into normalized staging tables.
-6. Run referential, completeness, freshness and policy checks.
-7. Build cross-layer infrastructure KPIs only after source semantics are understood.
+1. review actual API fields and version semantics
+2. define the least-privilege extraction boundary
+3. collect raw responses privately
+4. sanitize identifiers before public examples are created
+5. preserve source and collection timestamps separately
+6. compare actual fields with the planned nodes-and-guests schema
+7. extend the model only after relationships and controlled values are understood
+
+Storage, network-assignment and backup-run tables remain deferred until live source fields have been reviewed.
 
 ## Possible future KPIs
 
-### Network operations
+### Current network model
 
-- number of devices by role
-- active vs inactive interfaces
-- access vs trunk ports
-- VLAN usage
-- interface error counters
-- devices with missing documentation
-- outdated configuration snapshots
+- devices by role
+- active and inactive interfaces
+- interfaces by port role
+- documentation coverage
+- topology links by role and status
+- data-quality pass rate
+- operational warning count
 
-### Virtualization operations
+### Later virtualization model
 
 - nodes and guests by status
-- allocated versus observed CPU and memory
-- guests without documented owner or purpose
-- guests without an assigned backup policy
-- backup freshness and failed backup counts
-- storage capacity and utilization
-- stale or orphaned inventory relationships
-- management and guest network assignment coverage
+- allocated resources by purpose
+- guests without owner or purpose
+- backup-policy coverage
+- backup freshness
+- storage utilization
+- stale collection runs
 
 ## Out of scope
 
-- publishing raw real infrastructure exports
-- publishing credentials, API tokens, private addresses or production-like topology
-- claiming live Proxmox collection before a dedicated host exists
-- presenting the project as an enterprise monitoring platform
-- inflating a small learning lab into an enterprise-scale architecture
+- raw real infrastructure exports
+- credentials, private addresses or account identifiers
+- real MAC addresses or serial numbers
+- full Cisco configurations
+- live Proxmox claims before a host exists
+- production monitoring
+- enterprise-scale architecture claims
+- tool inflation such as Kafka, Airflow or Kubernetes without a real requirement
