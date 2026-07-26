@@ -122,8 +122,8 @@ class NetworkOperationsWorkflowTest(unittest.TestCase):
             build_database(database)
             write_quality_report(fetch_quality_results(database), generated)
             self.assertEqual(
-                DEFAULT_REPORT.read_text(encoding="utf-8"),
-                generated.read_text(encoding="utf-8"),
+                DEFAULT_REPORT.read_bytes(),
+                generated.read_bytes(),
             )
 
     def test_invalid_boolean_fails_before_database_is_published(self) -> None:
