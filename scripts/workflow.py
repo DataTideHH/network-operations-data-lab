@@ -293,7 +293,11 @@ def write_quality_report(
     report_path = Path(report_path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with report_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=REPORT_COLUMNS)
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=REPORT_COLUMNS,
+            lineterminator="\n",
+        )
         writer.writeheader()
         writer.writerows(results)
 
