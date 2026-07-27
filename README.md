@@ -1,5 +1,7 @@
 # Network Operations Data Lab
 
+[![GitHub Pages](https://github.com/DataTideHH/network-operations-data-lab/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/DataTideHH/network-operations-data-lab/actions/workflows/pages/pages-build-deployment)
+
 Network Operations Data Lab is a public-safe learning and portfolio project that turns sanitized infrastructure records into a reproducible Data/BI workflow.
 
 Project page: https://datatidehh.github.io/network-operations-data-lab/
